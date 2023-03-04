@@ -1,7 +1,7 @@
 # KG-System
 
 该系统实现了知识图谱的**本体管理**（ontology management）、**实体管理**（entity management）和**可视化管理**（visualization management），同时拓展了用户管理的功能（user management）和服务管理（service management）。其可以用于科研人员更快速高效地进行知识图谱管理甚至于对相关的人员和服务进行管理，将知识图谱应用到具体的科研问题中（如本系统最初的需求：电梯故障知识），当然我相信其可以被更多的知识图谱研究项目使用，因为其后端是基于抽象的知识图谱实体和关系进行构建的。
-
+The front end is in [mufiye_KG-System-front](https://github.com/mufiye/mufiye_KG-System-front).
 ## 项目展示
 
 这是系统中将电梯故障相关的实体以及实体关系进行可视化后的结果，更多系统展示的图片在demo_img目录下。
