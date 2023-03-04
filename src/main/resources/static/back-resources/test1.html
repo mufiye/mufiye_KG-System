@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<table id="datatable" width="100%" border="1">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Operation</th>
+    </tr>
+    <thead>
+</table>
+
+<script src="../js/jquery.min.js"></script>
+<!-- Page level plugins -->
+<script src="../vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="../vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<script>
+    var data1 = {
+        "draw": 2,
+        "recordsTotal": 11,
+        "recordsFiltered": 11,
+        "data": [
+            {
+                "id": 1,
+                "firstName": "Troy",
+                "lastName": "Young"
+            },
+            {
+                "id": 2,
+                "firstName": "Alice",
+                "lastName": "LL"
+            },
+            {
+                "id": 3,
+                "firstName": "Larry",
+                "lastName": "Bird"
+            },
+            {
+                "id": 1,
+                "firstName": "Troy",
+                "lastName": "Young"
+            },
+            {
+                "id": 2,
+                "firstName": "Alice",
+                "lastName": "LL"
+            },
+            {
+                "id": 3,
+                "firstName": "Larry",
+                "lastName": "Bird"
+            },
+            {
+                "id": 3,
+                "firstName": "Larry",
+                "lastName": "Bird"
+            },
+            {
+                "id": 3,
+                "firstName": "Larry",
+                "lastName": "Bird"
+            },
+            {
+                "id": 3,
+                "firstName": "Larry",
+                "lastName": "Bird"
+            },
+            {
+                "id": 3,
+                "firstName": "Larry",
+                "lastName": "Bird"
+            },
+            {
+                "id": 3,
+                "firstName": "Larry",
+                "lastName": "Bird"
+            },
+            {
+                "id": 3,
+                "firstName": "Larry",
+                "lastName": "Bird"
+            }
+            // ......
+        ]
+    }
+
+    $(document).ready(function () {
+
+    });
+    $(document).ready(function () {
+        var table = $("#datatable").DataTable({
+            data: data1.data,
+            buttons: [
+                'copy', 'excel', 'pdf'
+            ],
+            "columns": [
+                {"data": "id", "bSortable": false},
+                {"data": "firstName"},
+                {"data": "lastName"}
+            ]
+        });
+
+        $('#datatable tbody').on('click', 'tr', function () {
+            var data = table.row(this).data();
+            console.log(data)
+            alert('You clicked on ' + data.firstName + '\'s row');
+        });
+    });
+</script>
+</body>
+</html>

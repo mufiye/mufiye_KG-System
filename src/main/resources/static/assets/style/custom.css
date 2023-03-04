@@ -1,0 +1,33 @@
+/* ģ̬����ʽ */
+.modal.fade.in {
+    top: 1%;
+}
+.modal-header
+{
+font-weight:900;
+font-size:20px;
+}
+/* ���ɸѡ�����У��������ʽ */
+.input-text
+{
+width:150px;
+margin-bottom:0px !important;
+}
+.myTD
+{
+text-align:right !important;
+vertical-align:middle !important;
+}
+.mySelect
+{
+margin-right:10px;
+width:165px;
+margin-bottom: 0px;
+}
+
+#position{
+	position:relative;
+	top:10px;
+	left:1%;
+	width:98%;
+}

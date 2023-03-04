@@ -1,0 +1,714 @@
+<div class="container-fluid" id="entityMap">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            {{entity.className}} 实体可视化管理
+            &nbsp;
+            <button class="btn btn-primary" data-toggle="modal" data-target="#addEntityModal">新增实体</button>
+            <button class="btn btn-primary" @click="$('#mainContent').load('entityMap.html')">返回</button>
+        </h1>
+    </div>
+    <div id="myChart" style="width: 100%; height: 500px;"></div>
+
+    <!-- AddNodeModal -->
+    <div class="modal fade" id="addEntityModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">新增实体——{{entity.className}}</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid" v-for="(item,index) in entity.fieldsName">
+                        <div class="form-group">
+                            <label  class="control-label">{{item}}</label>
+                            <span v-if="allEnumData[index].data.length > 1" class="text-success">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;请选择：</span>
+                            <input type="text" class="form-control" @keyup.enter="$('#yesBtn').click();saveEntity()" v-if="allEnumData[index].data.length < 1" v-model="addNodeData[index]"/>
+                            <select class="form-control" v-else v-model="addNodeData[index]">
+                                <option v-for="(item) in allEnumData[index].data" :value="item">{{item}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="container-fluid row">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-primary btn-block" id="yesBtn" data-dismiss="modal" @click="saveEntity">确定</button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn btn-info btn-block" data-dismiss="modal" @click="$message.info('取消操作')">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- AddEdgeModal -->
+    <div class="modal fade" id="addEdgeModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">新建关系类型</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row container-fluid">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label class="control-label">请选择关系类型：</label>
+                                <select class="form-control" id="relationTypeSelect" @change="changeRelationType($event)" v-model="addEdgeData[0]">
+                                    <option v-for="(edgeInfo) in allEdgeTypes" :value="edgeInfo.relationName">
+                                        ID={{edgeInfo.id}} ： {{edgeInfo.relationName}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="container-fluid">
+                        <div class="form-group">
+                            <label  class="control-label">头结点：</label>
+                            <select class="form-control" v-model="addEdgeData[1]">
+                                <option :value="formData.id">
+                                    ID={{formData.id}}-{{formEntityType.className}} => {{formData.string}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="container-fluid">
+                        <div class="form-group">
+                            <label  class="control-label">请选择尾结点：</label>
+                            <select class="form-control" v-model="addEdgeData[2]">
+                                <option v-for="(node) in targetNodes" :value="node.id">
+                                    ID={{node.id}}-{{node.type}} => {{node.string}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="container-fluid" v-for="(item,index) in currentEdgeType.fieldsName">
+                        <div class="form-group">
+                            <label  class="control-label">{{item}}</label>
+                            <span v-if="allEnumDataForEdge[index].data.length >= 1" class="text-success">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;请选择：</span>
+                            <input type="text" class="form-control" v-if="allEnumDataForEdge[index].data.length < 1" v-model="addEdgeData[3+index]"/>
+                            <select class="form-control" v-else v-model="addEdgeData[3+index]">
+                                <option v-for="(item) in allEnumDataForEdge[index].data" :value="item">{{item}}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <div class="container-fluid row">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-primary btn-block" data-dismiss="modal" @click="saveEdge">保存</button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn btn-info btn-block" data-dismiss="modal" @click="$message.info('取消操作')">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- UpdateNodeModal -->
+    <div class="modal fade" id="updateEntityModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">更新信息——{{formEntityType.className}}</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="container-fluid row">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-info btn-block" data-dismiss="modal" @click="expandGraph">拓展节点</button>
+                            </div>
+                            <div class="col-6">
+                                <button type="button" class="btn btn-success btn-block" data-dismiss="modal"
+                                        @click="getEdgeClassByStartType(formEntityType.className);targetNodes = []" data-target="#addEdgeModal" data-toggle="modal">新增关系</button>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="container-fluid" v-for="(item,index) in formEntityType.fieldsName">
+                        <div class="form-group">
+                            <label  class="control-label">{{item}} </label>
+                            <span v-if="allEnumData[index].data.length >= 1" class="text-success">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;请选择：</span>
+                            <input type="text" class="form-control" v-if="allEnumData[index].data.length < 1" v-model="formData.properties[index]"/>
+                            <select class="form-control" v-else v-model="formData.properties[index]">
+                                <option v-for="(item) in allEnumData[index].data" :value="item">{{item}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="container-fluid row">
+                        <div class="col-4">
+                            <button type="button" class="btn btn-primary btn-block" data-dismiss="modal" @click="updateEntity">保存</button>
+                        </div>
+                        <div class="col-4">
+                            <button type="button" class="btn btn-danger btn-block" data-dismiss="modal" data-target="#deleteConfirmModal" data-toggle="modal">删除</button>
+                        </div>
+                        <div class="col-4">
+                            <button type="button" class="btn btn-info btn-block" data-dismiss="modal" @click="$message.info('取消操作')">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- UpdateEdgeModal -->
+    <div class="modal fade" id="updateEdgeModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">关系编辑</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row container-fluid">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label class="control-label">关系类型</label>
+                                <input type="text" class="form-control" v-model="edgeData.type" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="container-fluid">
+                        <div class="form-group">
+                            <label  class="control-label">头结点：</label>
+                            <select class="form-control" v-model="edgeData.source" disabled>
+                                <option v-for="(node) in graph.nodes" :value="node.id">ID={{node.id}} ：
+                                    {{node.className}}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="container-fluid">
+                        <div class="form-group">
+                            <label  class="control-label">尾结点：</label>
+                            <select class="form-control" v-model="edgeData.target" disabled>
+                                <option v-for="(node) in graph.nodes" :value="node.id">ID={{node.id}} ：
+                                    {{node.className}}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="container-fluid" v-for="(item1,index) in currentEdgeType.fieldsName">
+                        <div class="form-group">
+                            <label  class="control-label">{{item1}}</label>
+                            <span v-if="allEnumDataForEdge[index].data.length >= 1" class="text-success">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;请选择：</span>
+                            <input type="text" class="form-control" v-if="allEnumDataForEdge[index].data.length < 1" v-model="edgeData.properties[item1]"/>
+                            <select class="form-control" v-else v-model="edgeData.properties[item1]">
+                                <option v-for="(item) in allEnumDataForEdge[index].data" :value="item">{{item}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="container-fluid row">
+                        <div class="col-4">
+                            <button type="button" class="btn btn-info btn-block" data-dismiss="modal" @click="$message.info('取消操作')">取消</button>
+                        </div>
+                        <div class="col-4">
+                            <button type="button" class="btn btn-primary btn-block" data-dismiss="modal" @click="updateEdge">确定</button>
+                        </div>
+                        <div class="col-4">
+                            <button type="button" class="btn btn-danger btn-block" data-dismiss="modal"
+                                    data-toggle="modal" data-target="#deleteEdgeModal">删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认 -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">删除实体</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">是否确定删除该实体？</div>
+                <div class="modal-footer">
+                    <div class="container-fluid row">
+                        <div class="col-6">
+                            <button class="btn btn-info btn-block" type="button" data-dismiss="modal" @click="$message.info('取消操作')">取消</button>
+                        </div>
+                        <div class="col-6">
+                            <a class="btn btn-danger btn-block" href="javascript:void(0)" data-dismiss="modal" @click="deleteEntity">删除</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteEdgeModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">删除关系</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">是否确定删除该关系？</div>
+                <div class="modal-footer">
+                    <div class="container-fluid row">
+                        <div class="col-6">
+                            <button class="btn btn-info btn-block" type="button" data-dismiss="modal" @click="$message.info('取消操作')">取消</button>
+                        </div>
+                        <div class="col-6">
+                            <a class="btn btn-danger btn-block" href="javascript:void(0)" data-dismiss="modal" @click="deleteEdge">删除</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="js/vue.min.js"></script>
+
+<script src="js/axios-0.18.0.js"></script>
+<script src="js/echarts.min.js"></script>
+<link rel="stylesheet" href="plugins/elementui/index.css">
+<script src="plugins/elementui/index.js"></script>
+
+<script>
+
+    if(vue5 != null)
+        vue5.$destroy();
+
+    var vue5 = new Vue({
+        el: "#entityMap",
+        data: {
+            //增加节点的表单信息
+            addNodeData:[],
+            //修改节点的表单信息
+            formData: {
+                properties:[],
+                id:0,
+                string:""
+            },
+            //页面的实体类型
+            entity: {
+                id: 0,
+                fieldsName: [],
+                className: "",
+                fieldsValues: []
+            },
+            formEntityType:{
+                id: 0,
+                fieldsName: [],
+                className: "",
+                fieldsValues: []
+            },
+            //增加关系的表单信息 0：relationName 1：source 2：target 3...properties
+            addEdgeData:[],
+            edgeData:{},
+            targetNodes:[],
+            //所有可选的关系种类
+            allEdgeTypes:[],
+            currentEdgeType:{},
+            option: {
+                title: {
+                    text: '电梯知识图谱',
+                    subtext: 'Default layout',
+                    top: 'bottom',
+                    left: 'right'
+                },
+                tooltip: {
+                    formatter: function (e) {
+                        var r = "节点ID：" + e.data.id + "<br/>" + "实体类别：" + e.data.type + "<br/>"
+                        for (var entry in e.data.properties){
+                            r += entry + ": " + e.data.properties[entry] + "<br/>";
+                        }
+                        return r;
+                    }
+                },
+                animationDuration: 3000,
+                animationEasingUpdate: 'quinticInOut',
+                series: [{
+                    type: 'graph',
+                    layout: 'force',
+                    force: {
+                        repulsion: 500,
+                        edgeLength: 130,
+                    },
+                    edgeSymbol: ['none', 'arrow'],//边两端的标记类型，可以是一个数组分别指定两端，也可以是单个统一指定。默认不显示标记，常见的可以设置为箭头，如下：edgeSymbol: ['circle', 'arrow']
+                    edgeSymbolSize: 20,//边两端的标记大小，可以是一个数组分别指定两端，也可以是单个统一指定。
+                    draggable: true,
+                    symbolSize: 40,
+                    // links: this.graph.links,
+                    // categories: this.graph.categories,
+                    roam: true,
+                    label: {
+                        show: true,
+                        position: 'top',//节点上的标签显示在右面
+                        formatter: function (e){
+                            for(var key in e.data.properties){
+                                if(key.indexOf("name") || key.indexOf("名称")){
+                                    return e.data.properties[key];
+                                }
+                            }
+                            return e.data.type;
+                        },
+                        fontSize: "16"
+                    },
+                    lineStyle: {
+                        color: '#ff893c',
+                        curveness: 0.2,
+                        width: 3,
+                    },
+                    emphasis: {
+                        focus: 'adjacency',
+                        itemStyle: {
+                            color: "#fc9a19"
+                        },
+                        lineStyle: {
+                            width: 10,
+                            color: "#a9ff70"
+                        },
+                    }
+                }],
+            },
+            myChart: {},
+            //枚举信息
+            allEnumData:[],
+            allEnumDataForEdge:[],
+            graph: {
+                nodes: [],
+                links: []
+            },
+            clickParam:{},
+        },
+        mounted() {
+            this.myChart = echarts.init(document.querySelector("#myChart"));
+            this.myChart.setOption(this.option);
+
+            this.getInitClassType();
+
+            //注册监听事件
+            window.onresize = this.myChart.resize;
+            this.myChart.on('dblclick', (params) => {
+                this.clickParam = params;
+                if (params.dataType === "node") {
+                    this.getClassTypeByName(params.data.type);
+                    $("#updateEntityModal").modal();
+                } else {
+                    this.getEdgeTypeByName(params.data.type)
+                    $("#updateEdgeModal").modal();
+                }
+            });
+        },
+        methods: {
+            getInitClassType() {
+                axios.get("/classInfo/getBySession").then((res) => {
+                    this.entity = res.data.data;
+                    this.formEntityType = this.entity;
+                    this.addNodeData = [];
+                    for (var i = 0; i < this.formEntityType.fieldsName.length; i++){
+                        this.addNodeData.push("");
+                        this.addEnumData(this.allEnumData,this.formEntityType);
+                    }
+                    this.initNodes();
+                });
+            },
+            getClassTypeByName(name){
+                axios.get("/classInfo/className/"+name).then((res) => {
+                    this.formEntityType = res.data.data;
+                    this.allEnumData = []
+                    this.addNodeData = []
+                    for (var i = 0; i < this.formEntityType.fieldsName.length; i++){
+                        this.addNodeData.push("");
+                        this.addEnumData(this.allEnumData,this.formEntityType);
+                    }
+                    this.getNodeById(this.clickParam.data.id);
+                });
+            },
+            getEdgeTypeByName(name){
+                axios.get("/relationInfo/relationName/"+name).then((res) => {
+                    this.currentEdgeType = res.data.data;
+                    this.allEnumDataForEdge = [];
+
+                    for (var i = 0; i < this.currentEdgeType.fieldsName.length; i++){
+                        this.addEnumData(this.allEnumDataForEdge,this.currentEdgeType)
+                    }
+
+                    this.getEdgeById(this.clickParam.data.id)
+                });
+            },
+            changeRelationType(e){
+                var selectID = e.target.selectedIndex;
+                this.currentEdgeType = this.allEdgeTypes[selectID];
+                this.allEnumDataForEdge = [];
+
+                for (var i = 0; i < this.currentEdgeType.fieldsName.length; i++){
+                    this.addEnumData(this.allEnumDataForEdge,this.currentEdgeType)
+                }
+
+                axios.get("/classInfo/" + this.currentEdgeType.target).then(res=>{
+                    if(res.data.flag){
+                        var type = res.data.data.className // target class info
+                        this.getNodeByType(type);
+
+                    }
+                }).catch((e) => {
+                    console.log(e)
+                    this.$message.error("网络异常")
+                });
+            },
+            addEnumData(target,data1) {
+                let length = target.length;
+                target[length] = {};
+                target[length].name = data1.fieldsName[length];
+                target[length].index = length;
+                if (data1.fieldsValues[length].indexOf("||") > 0 || data1.fieldsValues[length] !== ""){
+                    target[length].data = data1.fieldsValues[length].split("||");
+                }
+                else{
+                    target[length].data = []
+                }
+            },
+            initNodes() {
+                axios.get("/entity/type/" + this.formEntityType.className).then((res) => {
+                    if (res.data.flag) {
+                        this.graph.nodes = res.data.data;
+                        this.option.series[0].data = this.graph.nodes;
+                        this.myChart.setOption(this.option);
+                    } else {
+
+                    }
+                }).catch((e) => {
+                    console.log(e)
+                    this.$message.error("网络异常")
+                })
+            },
+            getNodeById(id){
+                axios.get("/entity/"+id).then((res) => {
+                    if (res.data.flag) {
+                        this.formData.properties = []
+                        var length = 0
+                        for(var entry in res.data.data.properties) {
+                            this.formData.properties[length] = res.data.data.properties[this.formEntityType.fieldsName[length]];
+                            this.formData.string += " " + this.formEntityType.fieldsName[length] + " : " + this.formData.properties[length++];
+                        }
+                        this.formData.id = res.data.data.id;
+                    } else {
+
+                    }
+                }).catch((e) => {
+                    console.log(e)
+                    this.$message.error("网络异常")
+                })
+            },
+            getNodeByType(type){
+                axios.get("/entity/type/"+type).then((res) => {
+                    if (res.data.flag) {
+                        this.targetNodes = res.data.data;
+                        for (var i = 0; i < this.targetNodes.length;i++){
+                            this.targetNodes[i].string = ""
+                            for(var entry in this.targetNodes[i].properties) {
+                                this.targetNodes[i].string += " (" + entry + " : " + this.targetNodes[i].properties[entry] + ")";
+                            }
+                        }
+                    } else {
+
+                    }
+                }).catch((e) => {
+                    console.log(e)
+                    this.$message.error("网络异常")
+                })
+                this.$forceUpdate();
+            },
+            saveEntity(){
+                var newEntity = {
+                    type: this.formEntityType.className,
+                    properties:{}
+                };
+                for (var i = 0; i < this.addNodeData.length; i++){
+                    if (this.addNodeData[i] == "")
+                        continue;
+                    newEntity.properties[this.formEntityType.fieldsName[i]] = this.addNodeData[i];
+                }
+
+                axios.post("entity",newEntity).then((res) => {
+                    if (res.data.flag){
+                        this.$message.success(res.data.message);
+                    }
+                    else {
+                        this.$message.error(res.data.message);
+                    }
+                }).catch(()=>{
+                    this.$message.error("网络异常");
+                }).finally(this.initNodes);
+
+                this.addNodeData = [];
+            },
+            updateEntity(){
+                var newEntity = {
+                    id: this.formData.id,
+                    type: this.formEntityType.className,
+                    properties:{}
+                };
+
+                for (var i = 0; i < this.formEntityType.fieldsName.length; i++){
+                    newEntity.properties[this.formEntityType.fieldsName[i]] = this.formData.properties[i];
+                }
+                axios.put("entity",newEntity).then((res)=>{
+                    if (res.data.flag){
+                        this.$message.success(res.data.message);
+                    }
+                    else {
+                        this.$message.error(res.data.message);
+                    }
+                }).catch(()=>{
+                    this.$message.error("网络异常");
+                }).finally(this.initNodes);
+            },
+            deleteEntity() {
+                axios.delete("entity/" + this.formData.id).then((res) => {
+                    if (res.data.flag) {
+                        this.$message.success(res.data.message);
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                }).catch(() => {
+
+                    this.$message.error("网络异常");
+                }).finally(()=>{
+                });
+            },
+            saveEdge(){
+                var newRelation = {
+                    type: this.addEdgeData[0],
+                    source: this.addEdgeData[1],
+                    target: this.addEdgeData[2],
+                    properties:{}
+                };
+                for (var i = 3; i < this.addEdgeData.length; i++){
+                    newRelation.properties[this.currentEdgeType.fieldsName[i-3]] = this.addEdgeData[i];
+                }
+                axios.post("/relation",newRelation).then((res) => {
+                    if (res.data.flag){
+                        this.$message.success(res.data.message);
+                    }
+                    else {
+                        this.$message.error(res.data.message);
+                    }
+                }).catch(()=>{
+                    this.$message.error("网络异常");
+                }).finally();
+
+            },
+            updateEdge(){
+                axios.put("/relation",this.edgeData).then((res) => {
+                    if (res.data.flag){
+                        this.$message.success(res.data.message);
+                    }
+                    else {
+                        this.$message.error(res.data.message);
+                    }
+                }).catch(()=>{
+                    this.$message.error("网络异常");
+                }).finally(this.getEdges);
+
+            },
+            deleteEdge(){
+                axios.delete("/relation",{data:this.edgeData}).then((res) => {
+                    if (res.data.flag){
+                        this.$message.success(res.data.message);
+                    }
+                    else {
+                        this.$message.error(res.data.message);
+                    }
+                }).catch(()=>{
+                    this.$message.error("网络异常");
+                }).finally(this.getEdges);
+
+            },
+            getEdgeById(id){
+                axios.get("/relation/"+id).then((res) => {
+                    this.edgeData = res.data.data;
+                    this.$forceUpdate()
+                });
+            },
+            getEdgesThroughNeighbor(id) {
+                axios.get("/relation/neighbor/"+id).then((res) => {
+                    res.data.data.forEach(e=>{
+                        e.target += ""
+                        e.source += ""
+                        e.label = {
+                            show: true,
+                            formatter: function (e){
+                                if (e.data.type)
+                                    return e.data.type;
+                                else
+                                    return ""
+                            }
+                        }
+                    })
+                    this.graph.links = res.data.data;
+                    this.option.series[0].links = this.graph.links;
+
+                    this.myChart.setOption(this.option);
+                }).catch(()=>{
+                    this.$message.error("网络异常")
+                });
+            },
+            getNodesThroughNeighbor(id) {
+                axios.get("/entity/neighbor/"+id).then((res) => {
+                    this.graph.nodes = res.data.data;
+                    this.option.series[0].data = this.graph.nodes;
+
+                    this.myChart.setOption(this.option);
+                }).catch(()=>{
+                    this.$message.error("网络异常")
+                });
+            },
+            expandGraph(){
+                this.getNodesThroughNeighbor(this.formData.id);
+                this.getEdgesThroughNeighbor(this.formData.id);
+            },
+            getEdgeClassByStartType(type){
+                axios.get("/relationInfo/type/"+type).then((res) => {
+                    if (res.data.flag) {
+                        this.allEdgeTypes = res.data.data;
+
+                        //清空数据
+                        this.addEdgeData = []
+                        this.addEdgeData[1] = this.formData.id;
+                        this.$forceUpdate()
+                    } else {
+
+                    }
+                }).catch((e) => {
+                    console.log(e)
+                    this.$message.error("网络异常")
+                })
+            },
+        }
+    })
+</script>

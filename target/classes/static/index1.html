@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--引入thymeleaf的模板，非常重要！-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!--<html lang="en" style="background-color: #d9e0e7;">-->
+<!--<![endif]-->
+<head>
+    <meta charset="utf-8" />
+    <title>学术知识图谱管理系统</title>
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+    <meta content="" name="description" />
+    <meta content="" name="author" />
+
+    <!-- ================== BEGIN BASE CSS STYLE ================== -->
+    <link href="assets/jquery/jquery-ui.min.css" rel="stylesheet" />
+    <link href="assets/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="assets/style/font-awesome.min.css" rel="stylesheet" />
+    <link href="assets/style/animate.min.css" rel="stylesheet" />
+    <link href="assets/style/style.min.css" rel="stylesheet" />
+    <link href="assets/style/style-responsive.min.css" rel="stylesheet" />
+    <link href="assets/style/default.css" rel="stylesheet" id="theme" />
+    <!-- ================== END BASE CSS STYLE ================== -->
+    <!-- ================== BEGIN BASE JS ================== -->
+    <script src="../assets/teacher/pace.min.js"></script>
+    <!-- ================== END BASE JS ================== -->
+    <style>
+        .current{position:fixed;top:0px;}
+        .introjs-tooltip{width:250px;}
+        .introjs-helperLayer{background-color: rgba(255,255,255,0.3);}
+        #college{
+            color:#FFFFFF;
+            font-weight:bold;
+            font-size:17px;
+        }
+        html,body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<!--###实现页面加载时旋转动画###-->
+<!-- begin #page-loader -->
+<div id="page-loader" class="fade in"><span class="spinner"></span></div>
+<!-- end #page-loader -->
+
+<!-- begin #page-container -->
+<div id="page-container" class="fade page-sidebar-fixed page-header-fixed">
+    <!-- begin #header -->
+    <div id="header" class="header navbar navbar-default navbar-fixed-top">
+        <!-- begin container-fluid -->
+        <div class="container-fluid">
+            <!-- begin mobile sidebar expand / collapse button -->
+            <div class="navbar-header">
+                <a href="index.html" class="navbar-brand"><span class="navbar-logo"></span> 学术知识图谱管理系统</a>
+                <!--###不知道干什么的###-->
+                <button type="button" class="navbar-toggle" data-click="sidebar-toggled">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+
+            <!--###此处原本有值，如“所属单位：计算机学院”###-->
+<!--            <span id="college" style="position:absolute;right:900px;margin-top:20px;"></span>-->
+
+            <!-- end mobile sidebar expand / collapse button -->
+            <a id="fullScreen" class="btn btn-large btn-info" style="position:absolute;right:120px;margin-top:9px;">全屏查看</a>
+            <!-- <a id="mybtn" class="btn btn-large btn-info" style="position:absolute;right:120px;margin-top:9px;">使用演示</a> -->
+            <!-- begin header navigation right -->
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown navbar-user">
+                    <!--###javascipt:;用于防止链接跳转###-->
+                    <!--###此处用到了用户头像！###-->
+                    <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
+                        <img src="images/user-18.jpg" alt="" />
+                        <span class="hidden-xs" id="userName"></span> <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu animated fadeInLeft">
+                        <li><a href="javascript:;" onclick="logout();">退出</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <!-- end header navigation right -->
+        </div>
+        <!-- end container-fluid -->
+    </div>
+    <!-- end #header -->
+
+    <!-- begin #sidebar -->
+    <div id="sidebar" class="sidebar">
+        <!-- begin sidebar scrollbar -->
+        <div data-scrollbar="true" data-height="100%">
+            <!-- begin sidebar user -->
+            <!-- end sidebar user -->
+            <!-- begin sidebar nav -->
+            <ul class="nav">
+
+                <li class="has-sub">
+                    <a href="javascript:;">
+                        <b class="caret pull-right"></b>
+                        <i class="fa fa-th"></i>
+                        <span>教师实体管理</span>
+                    </a>
+                    <ul class="sub-menu" id="ul2-1">
+                        <li><a href="javascript:void(0)" title="query?type=teacher" class="turn">教师总览</a></li>
+                    </ul>
+                    <ul class="sub-menu" id="ul2-2">
+                        <li><a href="javascript:void(0);" title="teacherAdd" class="turn">教师新增</a></li>
+                    </ul>
+                </li>
+
+                <li class="has-sub">
+                    <a href="javascript:;">
+                        <b class="caret pull-right"></b>
+                        <i class="fa fa-align-left"></i>
+                        <span>系统管理</span>
+                    </a>
+                    <ul class="sub-menu" id="ul10">
+                        <li><a href="javascript:void(0);" title="systemManage" class="turn">数据表管理</a></li>
+                    </ul>
+                    <ul class="sub-menu" id="ul10-2">
+                        <li><a href="javascript:void(0);" title="fileUpload" class="turn">批量数据导入</a></li>
+                    </ul>
+                </li>
+
+                <li class="has-sub ">
+                    <a>
+                        <b class="caret pull-right"></b>
+                        <i class="fa fa-user"></i>
+                        <span>本体管理</span>
+                    </a>
+                    <ul class="sub-menu" id="ul1-1">
+                        <li><a href="javascript:void(0);" title="neo4jManage" class="turn">本体模式图</a></li>
+                    </ul>
+                </li>
+
+
+
+                <!-- begin sidebar minify button -->
+                <li><a href="javascript:;" class="sidebar-minify-btn" data-click="sidebar-minify"><i class="fa fa-angle-double-left"></i></a></li>
+                <!-- end sidebar minify button -->
+            </ul>
+            <!-- end sidebar nav -->
+        </div>
+        <!-- end sidebar scrollbar -->
+    </div>
+    <!-- <div class="sidebar-bg"></div> -->
+    <!-- end #sidebar -->
+
+    <!-- begin #content -->
+    <div id="content" class="content" style="height: 100%">
+        <div id="main" style="position: absolute; left: 220px; bottom: 0px; right: 0px; z-index: 2; overflow: hidden; top: 55px; width: auto;height: 100%">
+            <iframe name="right" id="rightMain" frameborder="no" scrolling="auto" width="100%" height="100%" allowtransparency="true"></iframe>
+        </div>
+    </div>
+    <!-- end #content -->
+
+    <!-- begin scroll to top btn -->
+    <a href="javascript:;" class="btn btn-icon btn-circle btn-success btn-scroll-to-top fade" data-click="scroll-top"><i class="fa fa-angle-up"></i></a>
+    <!-- end scroll to top btn -->
+</div>
+<!-- end page container -->
+
+<!-- ================== BEGIN BASE JS ================== -->
+<script src="assets/jquery/jquery-1.9.1.min.js"></script>
+<script src="assets/jquery/jquery-migrate-1.1.0.min.js"></script>
+<script src="assets/jquery/jquery-ui.min.js"></script>
+<script src="js/layui.js"></script>
+<script src="assets/bootstrap/bootstrap.js"></script>
+<script type="text/javascript" src="assets/teacher/intro.min.js"></script>
+<script type="text/javascript" src="assets/teacher/custom.js"></script>
+<!--[if lt IE 9]>
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<script src="assets/teacher/excanvas.js"></script>
+<![endif]-->
+<script src="assets/jquery/jquery.slimscroll.min.js"></script>
+<script src="assets/jquery/jquery.cookie.js"></script>
+
+
+<!-- ================== END BASE JS ================== -->
+
+<!-- ================== BEGIN PAGE LEVEL JS ================== -->
+<script src="assets/teacher/apps.min.js"></script>
+<!-- ================== END PAGE LEVEL JS ================== -->
+
+<script>
+    var userName;
+    $(document).ready(function() {
+        App.init();
+        $("#rightMain").attr("src","neo4jManage");
+        var $small = $('<small>'+getCookie('username')+'</small>');
+        $('#userName2').after($small);
+    });
+
+    /**退出系统**/
+    function logout() {
+        if (confirm("您确定要退出本系统吗？")) {
+            delCookie('username');
+            window.location.href="login";
+        }
+    }
+
+    function resetPassword() {
+        document.getElementById("resetPsw").click();
+    };
+    $(".turn").click(function(){
+        var src=$(this).attr("title");
+        $("#rightMain").attr("src",src);
+        $(".sub-menu li.active").removeClass("active");
+        $(".has-sub.active").removeClass("active");
+        $(this).parent().addClass("active");
+        $(this).parent().parent().parent().addClass("active");
+        scrollTo(0,0);
+    });
+
+    /**全屏查看**/
+    document.getElementById('fullScreen').onclick = function() {
+        if("ActiveXObject" in window){
+            if($.browser.version<9){
+                alert("当前浏览器版本过低,更新浏览器版本后可使用全屏功能");
+                return;
+            }
+        }
+        if (!document.fullscreenElement &&    // alternative standard method
+            !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.msRequestFullscreen) {
+                document.documentElement.msRequestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) {
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+            } else {
+                Fkey();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else {
+                Fkey();
+            }
+        }
+        if ($("#fullScreen").text()=="全屏查看") {
+            $("#fullScreen").text("退出全屏");
+        } else {
+            $("#fullScreen").text("全屏查看");
+        }
+    };
+
+
+</script>
+</body>
+</html>

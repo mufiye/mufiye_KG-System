@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../js/d3.v7.min.js"></script>
+</head>
+<body>
+    <svg id="mainsvg" class="svgs" width="1200" height="600"></svg>
+    <script>
+        const data = [{name:"waters",age:23},{name:"watersz",age:24},{name:"waters",age:25},
+            {name:"water44s",age:23},{name:"water33s",age:23},{name:"water22s",age:23},{name:"water22s",age:23}
+            ,{name:"water252s",age:23},{name:"water2232s",age:23},{name:"wat23er22s",age:23},{name:"water22s",age:23}];
+
+        const svg = d3.select("#mainsvg");
+        const width = +svg.attr("width");
+        const height = +svg.attr("height")
+        const margin = {top:60, right:30, bottom:60,left:150}
+        const innerWidth = width - margin.left - margin.right;
+        const innerHeight = height - margin.top - margin.bottom;
+
+        const xScale = d3.scaleLinear()
+        .domain([0,d3.max(data, d => d.age)]).range([0,innerWidth]);
+
+        const yScale = d3.scaleBand()
+            .domain(data.map(d => d.name)).range([0,innerHeight]).padding(0.1);
+
+        const g = svg.append('g').attr('id',"maingroup").attr('transform',`translate(${margin.left},${margin.top})`)
+        const yAxis = d3.axisLeft(yScale);
+        g.append('g').call(yAxis);
+
+        const xAxis = d3.axisBottom(xScale);
+        g.append('g').call(xAxis).attr("transform",`translate(0,${innerHeight})`)
+
+        data.forEach(d => {
+            g.append("rect")
+            .attr("width",xScale(d.age))
+            .attr("height",yScale.bandwidth())
+            .attr("fill","green")
+            .attr("x","1")
+            .attr("y",yScale(d.name))
+        })
+
+        d3.selectAll(".tick text").attr("font-size","2em")
+
+        g.append("text").text("My Bar Chart")
+        .attr("font-size","3em")
+        .attr("transform",`translate(${innerWidth/2},-10)`)
+        .attr("text-anchor","middle");
+
+    </script>
+</body>
+</html>

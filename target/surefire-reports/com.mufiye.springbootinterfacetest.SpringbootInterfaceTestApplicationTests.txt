@@ -1,0 +1,24 @@
+-------------------------------------------------------------------------------
+Test set: com.mufiye.springbootinterfacetest.SpringbootInterfaceTestApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 29, Failures: 0, Errors: 5, Skipped: 0, Time elapsed: 2.125 s <<< FAILURE! - in com.mufiye.springbootinterfacetest.SpringbootInterfaceTestApplicationTests
+testEntity3  Time elapsed: 0.023 s  <<< ERROR!
+java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at com.mufiye.springbootinterfacetest.SpringbootInterfaceTestApplicationTests.testEntity3(SpringbootInterfaceTestApplicationTests.java:112)
+
+testGetByID  Time elapsed: 0.007 s  <<< ERROR!
+java.util.NoSuchElementException: No value present
+	at com.mufiye.springbootinterfacetest.SpringbootInterfaceTestApplicationTests.testGetByID(SpringbootInterfaceTestApplicationTests.java:68)
+
+testRelationUpdate  Time elapsed: 0.001 s  <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "java.util.Map.entrySet()" because "properties" is null
+	at com.mufiye.springbootinterfacetest.SpringbootInterfaceTestApplicationTests.testRelationUpdate(SpringbootInterfaceTestApplicationTests.java:169)
+
+testRelationInfoGetByID  Time elapsed: 0.015 s  <<< ERROR!
+java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at com.mufiye.springbootinterfacetest.SpringbootInterfaceTestApplicationTests.testRelationInfoGetByID(SpringbootInterfaceTestApplicationTests.java:203)
+
+testNeighbour  Time elapsed: 0.036 s  <<< ERROR!
+java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
+	at com.mufiye.springbootinterfacetest.SpringbootInterfaceTestApplicationTests.testNeighbour(SpringbootInterfaceTestApplicationTests.java:218)
+

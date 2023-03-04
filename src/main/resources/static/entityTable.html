@@ -1,0 +1,343 @@
+<div class="container-fluid" id="entityTable">
+
+    <!-- Page Heading -->
+    <h1 class="h3 mb-2 text-gray-800">
+        {{entity.className}}管理
+        &nbsp;
+        <button class="btn btn-primary" data-toggle="modal" data-target="#addEntityModal">新增实体 +</button>
+    </h1>
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-body" >
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" id="dataTable" cellspacing="0">
+                    <thead>
+
+                    <tr id="tableHeadRow">
+                        <th v-for="item in entity.fieldsName">{{item}}</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="addEntityModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">新增实体——{{entity.className}}</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid" v-for="(item,index) in entity.fieldsName">
+                        <div class="form-group">
+                            <label  class="control-label">{{item}}</label>
+                            <span v-if="allEnumData[index].data.length > 1" class="text-success">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;请选择：</span>
+                            <input type="text" class="form-control" v-if="allEnumData[index].data.length < 1" v-model="addFormData[index]"/>
+                            <select class="form-control" v-else v-model="addFormData[index]">
+                                <option v-for="(item) in allEnumData[index].data" :value="item">{{item}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="container-fluid row">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-primary btn-block" data-dismiss="modal" @click="saveEntity">确定</button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" class="btn btn-danger btn-block" data-dismiss="modal" @click="$message.info('取消操作')">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="updateModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">更新信息——{{entity.className}}</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid" v-for="(item,index) in entity.fieldsName">
+                        <div class="form-group">
+                            <label  class="control-label">{{item}} </label>
+                            <span v-if="allEnumData[index].data.length > 1" class="text-success">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;请选择：</span>
+                            <input type="text" class="form-control" v-if="allEnumData[index].data.length < 1" v-model="formData.properties[index]"/>
+                            <select class="form-control" v-else v-model="formData.properties[index]">
+                                <option v-for="(item) in allEnumData[index].data" :value="item">{{item}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="container-fluid row">
+                        <div class="col-4">
+                            <button type="button" class="btn btn-primary btn-block" data-dismiss="modal" @click="updateEntity">保存</button>
+                        </div>
+                        <div class="col-4">
+                            <button type="button" class="btn btn-danger btn-block" data-dismiss="modal" data-target="#deleteConfirmModal" data-toggle="modal">删除</button>
+                        </div>
+                        <div class="col-4">
+                            <button type="button" class="btn btn-info btn-block" data-dismiss="modal" @click="$message.info('取消操作')">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 删除确认 -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">删除实体</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">是否确定删除该实体？</div>
+                <div class="modal-footer">
+                    <div class="container-fluid row">
+                        <div class="col-6">
+                            <button class="btn btn-info btn-block" type="button" data-dismiss="modal" @click="$message.info('取消操作')">取消</button>
+                        </div>
+                        <div class="col-6">
+                            <a class="btn btn-danger btn-block" href="javascript:void(0)" data-dismiss="modal" @click="deleteEntity">删除</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- /.container-fluid -->
+
+<script src="js/vue.min.js"></script>
+<!-- Page level plugins -->
+<script src="vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<link rel="stylesheet" href="plugins/elementui/index.css">
+
+<script src="plugins/elementui/index.js"></script>
+
+<script>
+
+    if (vue3 != null)
+        vue3.$destroy();
+
+    var vue3 = new Vue({
+        el: "#entityTable",
+        data: {
+            tableData: [],
+            dataIds:[],
+            formData: {
+                properties:[],
+                id:0,
+            },
+            allEnumData: [],
+            enumData:{
+                data:[],
+                name:"",
+                index:0,
+                enabled:false,
+            },
+            addFormData:[],
+            //实体类型
+            entity: {
+                id: 0,
+                fieldsName: [],
+                className: "",
+                fieldsValues: []
+            },
+            clickRow:-1,
+            dataTable:{}
+        },
+        mounted() {
+            this.getNodeById();
+        },
+        methods: {
+            //id由服务器session提供 初始化
+            getNodeById() {
+                axios.get("/classInfo/getBySession").then((res) => {
+                    this.entity = res.data.data;
+                    for (var i = 0; i < this.entity.fieldsName.length; i++){
+                        this.addFormData.push("");
+                        this.addEnumData();
+                    }
+                    this.getAll();
+                });
+            },
+            addEnumData() {
+                let length = this.allEnumData.length;
+                this.allEnumData[length] = [];
+                this.allEnumData[length].name = this.entity.fieldsName[length];
+                this.allEnumData[length].index = length;
+                if (this.entity.fieldsValues[length].indexOf("||") > 0 || this.entity.fieldsValues[length] !== ""){
+                    this.allEnumData[length].data = this.entity.fieldsValues[length].split("||");
+                    this.allEnumData[length].enabled = true;
+                }
+                else{
+                    this.allEnumData[length].data = []
+                    this.allEnumData[length].enabled = false;
+                }
+            },
+            getAll() {
+                axios.get("/entity/type/" + this.entity.className).then((res) => {
+                    if (res.data.flag) {
+                        for (var i = 0; i < res.data.data.length;i++){
+                            if (Object.keys(res.data.data[i].properties).length < this.entity.fieldsName.length){
+                                for (var j = 0; j <this.entity.fieldsName.length;j++){
+                                    if(res.data.data[i].properties[this.entity.fieldsName[j]] === undefined){
+                                        res.data.data[i].properties[this.entity.fieldsName[j]] = "";
+                                    }
+                                }
+                            }
+                            this.tableData[i] = res.data.data[i].properties;
+                            this.dataIds[i] = res.data.data[i].id;
+                        }
+                        let columns = [];
+                        for (var i = 0; i < this.entity.fieldsName.length;i++){
+                            columns[i] = {};
+                            columns[i]["data"] = this.entity.fieldsName[i];
+                        }
+                        var len = columns.length;
+                        columns[len] = {};
+                        columns[len]["data"] = null;
+                        this.dataTable = $("#dataTable").DataTable({
+                            destroy: true,
+                            data: this.tableData,
+                            buttons: ['copy', 'excel', 'pdf'],
+                            "columnDefs": [
+                                {
+                                    // targets用于指定操作的列，从第0列开始，-1为最后一列，这里第六列
+                                    // return后边是我们希望在指定列填入的按钮代码
+                                    "targets": -1,
+                                    "render": function ( data, type, full, meta ) {
+                                        return "<input type = 'button' class='btn btn-primary' id = 'tableVisualButton' value = '可视化'>";
+                                    }
+                                }
+                            ],
+                            columns: columns,
+                            language: {
+                                oPaginate: {
+                                    "sFirst": "首页",
+                                    "sPrevious": "上一页",
+                                    "sNext": "下一页",
+                                    "sLast": "末页"
+                                },
+                                sSearch: "搜索:",
+                                sInfo: "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                                sLengthMenu: "每页显示 _MENU_",
+                                "sSearchPlaceholder": "在此搜索任意列信息...",
+                                "sZeroRecords": "没有匹配的结果...",
+                                "sInfoEmpty": "无匹配结果",
+                                "sInfoFiltered": "(搜索前共 _MAX_ 条结果)",
+                            }
+                        });
+                        $('#dataTable tbody').on('click', 'tr td', this.formData, (e) => {
+                            if(this.tableData.length === 0)
+                                return;
+                            this.clickRow = e.target._DT_CellIndex.row;
+                            var data = this.dataTable.row(this.clickRow).data();
+                            this.formData.properties = []
+                            var length = 0
+                            for(var entry in data) {
+                                this.formData.properties[this.formData.properties.length] = data[this.entity.fieldsName[length++]];
+                            }
+                            this.formData.id = this.dataIds[this.clickRow];
+                            $("#updateModal").modal();
+                        });
+                        $("#dataTable tbody").on("click", "#tableVisualButton",this.dataIds,(e)=>{
+                            //获取行
+                            var clickRow = e.target.offsetParent._DT_CellIndex.row;
+                            var id = this.dataIds[clickRow];
+                            axios.get("system/setVisualNodeId/"+id).then(res=>{
+                                if(res.data.flag){
+                                    $("#mainContent").load("singleMap.html");
+                                }
+                                else {
+                                    console.log("failed")
+                                }
+                            })
+                        });
+                    } else {
+
+                    }
+                }).catch((e) => {
+                    console.log(e)
+                    this.$message.error("网络异常")
+                })
+            },
+            saveEntity(){
+                var newEntity = {
+                   type: this.entity.className,
+                   properties:{}
+                };
+                for (var i = 0; i < this.addFormData.length;i++){
+                    newEntity.properties[this.entity.fieldsName[i]] = this.addFormData[i];
+                }
+
+                axios.post("entity",newEntity).then((res) => {
+                    if (res.data.flag){
+                        this.$message.success(res.data.message);
+                    }
+                    else {
+                        this.$message.error(res.data.message);
+                    }
+                }).catch(()=>{
+                    this.$message.error("网络异常");
+                }).finally(this.getAll);
+
+                this.addFormData = [];
+            },
+            deleteEntity() {
+                axios.delete("entity/" + this.formData.id).then((res) => {
+                    if (res.data.flag) {
+                        this.$message.success(res.data.message);
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                }).catch(() => {
+
+                    this.$message.error("网络异常");
+                }).finally(()=>{
+                    setTimeout(()=>{$("#mainContent").load("entityTable.html")},200);
+                });
+            },
+            updateEntity(){
+                var newEntity = {
+                    id: this.formData.id,
+                    type: this.entity.className,
+                    properties:{}
+                };
+
+                for (var i = 0; i < this.entity.fieldsName.length;i++){
+                    newEntity.properties[this.entity.fieldsName[i]] = this.formData.properties[i];
+                }
+                axios.put("entity",newEntity).then((res)=>{
+                    if (res.data.flag){
+                        this.$message.success(res.data.message);
+                    }
+                    else {
+                        this.$message.error(res.data.message);
+                    }
+                }).catch(()=>{
+                    this.$message.error("网络异常");
+                }).finally(this.getAll);
+            },
+        }
+    })
+</script>
